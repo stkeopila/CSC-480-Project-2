@@ -14,8 +14,11 @@ def initialize_deck():
     return deck
 
 def start_game(deck):
-    ran_num = random.choice(deck)
-    print(ran_num)
+    cards_out_of_deck = []
+    ran_card = random.choice(deck)
+    cards_out_of_deck.append(ran_card)
+    print(ran_card)
+    print(cards_out_of_deck)
 
 
 if __name__ == "__main__":
