@@ -1,3 +1,7 @@
+import sys
+import math
+import random
+
 
 def initialize_deck():
     suits = ['Diamond', 'Clubs', 'Heart', 'Spade']
@@ -7,9 +11,13 @@ def initialize_deck():
         for number in numbers:
             card = (number, suit)
             deck.append(card)
-    for card in deck:
-        print(card)
+    return deck
+
+def start_game(deck):
+    ran_num = random.choice(deck)
+    print(ran_num)
+
 
 if __name__ == "__main__":
-    initialize_deck()
-
+    deck = initialize_deck()
+    start_game(deck)
