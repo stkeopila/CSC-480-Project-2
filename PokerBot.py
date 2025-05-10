@@ -4,7 +4,7 @@ import random
 from collections import Counter
 
 def hand_value(hand, cards_on_table):
-    hand_rankings = {"Royal Flush": 10, "Straight Flush":9, "Four of a Kind":8, "Full House":7, "Flush":6, "Straight":5, "Three of a Kind":4, "Two Pair":3, "One Pair":2, "High Card":1 }
+    hand_rankings = {"Royal Flush": 23, "Straight Flush":22, "Four of a Kind":21, "Full House":20, "Flush":19, "Straight":18, "Three of a Kind":17, "Two Pair":16, "One Pair":15, "High Card":1 }
     current_hand = hand + cards_on_table
     print(current_hand)
     values = []
@@ -75,7 +75,7 @@ def hand_value(hand, cards_on_table):
         print("High card") 
         return hand_rankings["High Card"]
 
-
+# def monte_carlo_search():
 
 def initialize_deck():
     suits = ['Diamond', 'Clubs', 'Heart', 'Spade']
@@ -95,7 +95,10 @@ def start_game(deck):
     cards_on_table, removed_cards = flop(deck, removed_cards)
     for card, suit, value in cards_on_table:
         print(f"{card}, {suit}")
-    hand_value(bot, cards_on_table)
+    value_of_hand = hand_value(bot, cards_on_table)
+    if value_of_hand == 1:
+        value_of_hand = max(bot[0][2], bot[1][2])
+    print(value_of_hand)
 
 def flop(deck, removed_cards):
     cards_on_table = []
