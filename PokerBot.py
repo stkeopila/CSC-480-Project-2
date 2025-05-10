@@ -65,7 +65,7 @@ def hand_value(hand, cards_on_table):
 
 def monte_carlo_search(hand, cards_on_table, deck):
     wins, simulations = 0, 0
-    time_limit = 5
+    time_limit = 10
     time_start = time.time()
     while time.time() - time_start < time_limit:
         available_cards = [card for card in deck if card not in hand + cards_on_table]
