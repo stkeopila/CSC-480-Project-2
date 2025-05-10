@@ -1,8 +1,70 @@
 import sys
 import math
 import random
+from collections import Counter
 
-# def hand_value(hand, cards_on_table):
+def test():
+    current_hand = [('2', 'Spade', 2), ('3', 'Spade', 3), ('4', 'Spade', 4), ('5', 'Spade', 5), ('6', 'Spade', 6)]
+    values = []
+    suits = []
+    for card in current_hand:
+        values.append(card[2])
+    values.sort(reverse=True)
+    for card in current_hand:
+        suits.append(card[1])
+    value_counts = Counter(values)
+    suit_counts = Counter(suits)
+    for suit, count in suit_counts.items():
+        if count >= 5:
+            flush = suit
+    flush_card = []
+    if flush:
+        for card in current_hand:
+            if card[1] == flush:
+                flush_card.append(card)
+        flush_card.sort(reverse=True)
+
+def hand_value(hand, cards_on_table):
+    hand_rankings = {"Royal Flush": 10, "Straight Flush":9, "Four of a Kind":8, "Full House":7, "Flush":6, "Straight":5, "Three of a Kind":4, "Two Pair":3, "One Pair":2, "High Card":1 }
+    current_hand = hand + cards_on_table
+    print(current_hand)
+    values = []
+    suits = []
+    for card in current_hand:
+        values.append(card[2])
+    values.sort(reverse=True)
+    for card in current_hand:
+        suits.append(card[1])
+    value_counts = Counter(values)
+    suit_counts = Counter(suits)
+    # flush
+    flush = None
+    for suit, count in suit_counts.items():
+        if count >= 5:
+            flush = suit
+    flush_card = []
+    if flush:
+        for card in current_hand:
+            if card[1] == flush:
+                flush_card.append(card)
+        flush_card.sort(reverse=True)
+    
+
+
+    #straight
+    straight = False
+    straight_value = sorted(set(values))
+    for i in range(len(straight_value) - 4):
+        straight_window = straight_value[i:i+5]
+        if straight_window[-1] - straight_window[0] == 4:
+            straight = True
+
+    # if flush:
+
+
+    print(value_counts)
+    print(suit_counts)
+
 
 
 def initialize_deck():
@@ -20,16 +82,11 @@ def start_game(deck):
     bot, player = pre_flop(deck)
     for card in bot:
         removed_cards.append(card)
-    print("Fold or Stay?")
-    answer = input()
-    if answer.lower() == "fold":
-        print("Game Over")
-    elif answer.lower() == "stay":
-        cards_on_table, removed_cards = flop(deck, removed_cards)
-        for card, suit, value in cards_on_table:
-            print(f"{card}, {suit}")
-    else:
-        ("Can Only Choose Fold or Stay")
+    cards_on_table, removed_cards = flop(deck, removed_cards)
+    for card, suit, value in cards_on_table:
+        print(f"{card}, {suit}")
+    test()
+    # hand_value(bot, cards_on_table)
 
 def flop(deck, removed_cards):
     cards_on_table = []
