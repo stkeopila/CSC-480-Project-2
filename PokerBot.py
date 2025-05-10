@@ -4,7 +4,7 @@ import random
 from collections import Counter
 
 def test():
-    current_hand = [('2', 'Spade', 2), ('3', 'Spade', 3), ('4', 'Spade', 4), ('5', 'Spade', 5), ('6', 'Spade', 6)]
+    current_hand = [('10', 'Spade', 10), ('J', 'Spade', 11), ('Q', 'Spade', 12), ('K', 'Spade', 13), ('A', 'Spade', 14)]
     values = []
     suits = []
     for card in current_hand:
@@ -21,8 +21,19 @@ def test():
     if flush:
         for card in current_hand:
             if card[1] == flush:
-                flush_card.append(card)
-        flush_card.sort(reverse=True)
+                flush_card.append(card[2])
+    straight = False
+    straight_value = sorted(set(values))
+    for i in range(len(straight_value) - 4):
+        straight_window = straight_value[i:i+5]
+        if straight_window[-1] - straight_window[0] == 4:
+            straight = True
+    print(flush_card)
+
+    if flush_card and set([10, 11, 12, 13, 14]).issubset(set(flush_card)):
+        print("royal Flsuh")
+        # return current_hand["Royal Flush"]
+
 
 def hand_value(hand, cards_on_table):
     hand_rankings = {"Royal Flush": 10, "Straight Flush":9, "Four of a Kind":8, "Full House":7, "Flush":6, "Straight":5, "Three of a Kind":4, "Two Pair":3, "One Pair":2, "High Card":1 }
