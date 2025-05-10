@@ -1,12 +1,11 @@
 import sys
-import math
 import random
+import time
 from collections import Counter
 
 def hand_value(hand, cards_on_table):
     hand_rankings = {"Royal Flush": 23, "Straight Flush":22, "Four of a Kind":21, "Full House":20, "Flush":19, "Straight":18, "Three of a Kind":17, "Two Pair":16, "One Pair":15, "High Card":1 }
     current_hand = hand + cards_on_table
-    print(current_hand)
     values = []
     suits = []
     for card in current_hand:
@@ -31,51 +30,65 @@ def hand_value(hand, cards_on_table):
         straight_window = straight_value[i:i+5]
         if straight_window[-1] - straight_window[0] == 4:
             straight = True
-    print(flush_card)
-
-    print(value_counts)
-    print(suit_counts)
 
     if flush_card and set([10, 11, 12, 13, 14]).issubset(set(flush_card)):
-        print("royal Flsuh")
         return hand_rankings["Royal Flush"]
     
     elif flush and straight == True:
-        print("Straight Flush")
         return hand_rankings["Straight Flush"]
 
     elif 4 in value_counts.values():
         return hand_rankings["Four of a Kind"]
 
     elif 3 in value_counts.values() and 2 in value_counts.values():
-        print("Full House")
         return hand_rankings["Full House"]
 
     elif flush:
-        print("Flush")
         return hand_rankings["Flush"]
     
     elif straight:
-        print("Straight")
         return hand_rankings["Straight"]
 
     elif 3 in value_counts.values():
-        print("Three of a kind")
         return hand_rankings["Three of a Kind"]
 
     elif list(value_counts.values()).count(2) >= 2:
-        print("Two Pair")
         return hand_rankings["Two Pair"]
     
     elif 2 in value_counts.values():
-        print("One Pair")
         return hand_rankings["One Pair"]
 
     else:
-        print("High card") 
-        return hand_rankings["High Card"]
+        curr_hand = [card[2] for card in current_hand]
+        high_card = max(curr_hand)
+        return high_card
 
-# def monte_carlo_search():
+def monte_carlo_search(hand, cards_on_table, deck):
+    wins, simulations = 0, 0
+    time_limit = 5
+    time_start = time.time()
+    while time.time() - time_start < time_limit:
+        available_cards = [card for card in deck if card not in hand + cards_on_table]
+        ran_player_hand = random.sample(available_cards, 2)
+        for card in ran_player_hand:
+            available_cards.remove(card)
+        needed = 5 - len(cards_on_table)
+        random_sim = cards_on_table + random.sample(available_cards, needed)
+        bot_score = hand_value(hand, random_sim)
+        player_score = hand_value(ran_player_hand, random_sim)
+        if bot_score >= player_score:
+            wins += 1
+        simulations += 1
+    wr = wins / simulations
+    print(f"Simulations: {simulations}")
+    print(f"Wins: {wins}")
+    print(f"Ratio: {wr}")
+
+    if wr >= 0.5:
+        return "Stay"
+    else:
+        return "Fold"
+    
 
 def initialize_deck():
     suits = ['Diamond', 'Clubs', 'Heart', 'Spade']
@@ -88,41 +101,59 @@ def initialize_deck():
     return deck
 
 def start_game(deck):
-    removed_cards = []
-    bot, player = pre_flop(deck)
-    for card in bot:
-        removed_cards.append(card)
-    cards_on_table, removed_cards = flop(deck, removed_cards)
-    for card, suit, value in cards_on_table:
-        print(f"{card}, {suit}")
-    value_of_hand = hand_value(bot, cards_on_table)
-    if value_of_hand == 1:
-        value_of_hand = max(bot[0][2], bot[1][2])
-    print(value_of_hand)
-
-def flop(deck, removed_cards):
+    available_cards = deck
     cards_on_table = []
-    for i in range(3):
-        flopCard = random.choice(deck)
-        cards_on_table.append(flopCard)
-        deck.remove(flopCard)
-        removed_cards.append(flopCard)
-    return cards_on_table, removed_cards
+    bot, player, available_cards = pre_flop(deck)
+    if monte_carlo_search(bot, cards_on_table, deck) == "Fold":
+        print("Folded On Pre Flop")
+        sys.exit(1)
+    cards_on_table = flop(available_cards)
+    if monte_carlo_search(bot, cards_on_table, deck) == "Fold":
+        print("Folded On Flop")
+        sys.exit(1)
+    cards_on_table = cards_on_table + turn(available_cards)
+    if monte_carlo_search(bot, cards_on_table, deck) == "Fold":
+        print("Folded On Turn")
+        sys.exit(1)
+    cards_on_table = cards_on_table + river(available_cards)
+    if monte_carlo_search(bot, cards_on_table, deck) == "Fold":
+        print("Folded On River")
+        sys.exit(1)
+    if hand_value(bot, cards_on_table) > hand_value(player, cards_on_table):
+        print("win")
+        print(f"Bot Hand: {bot}")
+        print(f"Player Hand: {player}")
+        print(f"Cards on Table: {cards_on_table}")
+    else:
+        print("loss")
+        print(f"Bot Hand: {bot}")
+        print(f"Player Hand: {player}")
+        print(f"Cards on Table: {cards_on_table}")
+
+def river(deck):
+    card_river = random.sample(deck, 1)[0]
+    deck.remove(card_river)
+    return [card_river]
+
+def turn(deck):
+    card_turned = random.sample(deck, 1)[0]
+    deck.remove(card_turned)
+    return [card_turned]
+
+def flop(deck):
+    cards_on_table = random.sample(deck, 3)
+    for card in cards_on_table:
+        deck.remove(card)
+    return cards_on_table
 
 def pre_flop(deck):
-    bot, player = [], []
-    for i in range(2):
-        playerCard = random.choice(deck)
-        player.append(playerCard)
-        deck.remove(playerCard)
-        botCard = random.choice(deck)
-        bot.append(botCard)
-        deck.remove(botCard)
-    for card, suit, value in bot:
-        print(f"Bot: {card}, {suit}")
-    for card, suit, value in player:
-        print(f"Player: {card}, {suit}")
-    return(bot, player)
+    bot = random.sample(deck, 2)
+    for card in bot:
+        deck.remove(card)
+    player = random.sample(deck, 2)
+    for card in player:
+        deck.remove(card)
+    return(bot, player, deck)
 
 
 if __name__ == "__main__":
